@@ -1,0 +1,25 @@
+version: '3.8'
+--from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+services:
+  web:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - 8181:80
+    volumes:
+      - ./docker/nginx/:/etc/nginx/conf.d/
+      - ./:/var/www
+    networks:
+      - basic-network
+
+  php:
+    image: php:8.1-fpm
+    volumes:
+      - ./:/var/www
+    networks:
+      - basic-network
+  
+networks:
+  basic-network:
+    driver: bridge  
