@@ -1,25 +1,55 @@
 version: '3.8'
---from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 services:
-  web:
-    image: nginx:alpine
-    restart: always
-    ports:
-      - 8181:80
+  app:
+    build:
+      args:
+        user: glaydson
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: glaydson/laravel-app
+    working_dir: /var/www/
     volumes:
-      - ./docker/nginx/:/etc/nginx/conf.d/
       - ./:/var/www
+    restart: unless-stopped
     networks:
-      - basic-network
+      - docker-laravel
 
-  php:
-    image: php:8.1-fpm
+  #mysql
+  mysql:
+    image: mysql:5.7.22
+    restart: unless-stopped
+    ports:
+      - 3307:3306
     volumes:
+      - ./.docker/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSOWORD: ${DB_PASSWORD}
+    networks: 
+      - docker-laravel
+
+  # nginx
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports: 
+      - "8989:80"
+    volumes: 
       - ./:/var/www
-    networks:
-      - basic-network
-  
+      - ./docker/nginx/:/etc/nginx/conf.d/
+    networks: 
+      - docker-laravel
+
+  # nginx
+  redis:
+    image: redis:latest
+    networks: 
+      - docker-laravel
+
 networks:
-  basic-network:
-    driver: bridge  
+  docker-laravel:
+    driver: bridge
