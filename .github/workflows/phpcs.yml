@@ -1,0 +1,17 @@
+name: PHPCS
+
+on: [push, pull_request]
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.pkg.github.com/mrglaydson/docker-php/phpcs:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: PHPCS
+        run: .
